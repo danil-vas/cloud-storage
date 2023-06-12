@@ -6,6 +6,18 @@ import (
 	"net/http"
 )
 
+// @Summary SingUp
+// @Tags auth
+// @Description create account
+// @ID create-account
+// @Accept json
+// @Produce json
+// @Param input body cloud_storage.User true "account info"
+// @Success 200 {integer} integer 1
+// @Failure 400,404 {string}  string    "error"
+// @Failure 500 {string}  string    "error"
+// @Failure default {string}  string    "error"
+// @Router /auth/sing-up [post]
 func (h *Handler) singUp(c *gin.Context) {
 	var input cloud_storage.User
 
@@ -30,6 +42,18 @@ type signInInput struct {
 	Password string `json:"password" building:"required"`
 }
 
+// @Summary SignIn
+// @Tags auth
+// @Description login
+// @ID login
+// @Accept  json
+// @Produce  json
+// @Param input body signInInput true "credentials"
+// @Success 200 {string} string "token"
+// @Failure 400,404 {string}  string    "error"
+// @Failure 500 {string}  string    "error"
+// @Failure default {string}  string    "error"
+// @Router /auth/sign-in [post]
 func (h *Handler) singIn(c *gin.Context) {
 	var input signInInput
 

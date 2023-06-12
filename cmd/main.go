@@ -8,6 +8,17 @@ import (
 	"log"
 )
 
+// @title Cloud Storage
+// @version 1.0
+// @description API Server for CloudStorage Application
+
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     "localhost",

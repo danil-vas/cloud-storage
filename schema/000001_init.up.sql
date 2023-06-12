@@ -3,7 +3,8 @@ CREATE TABLE users (
                        login VARCHAR(50) NOT NULL,
                        name VARCHAR(50) NOT NULL,
                        username VARCHAR(50) NOT NULL,
-                       password_hash VARCHAR(255) NOT NULL
+                       password_hash VARCHAR(255) NOT NULL,
+                       available_memory INT NOT NULL
 );
 
 CREATE TABLE typeObject (

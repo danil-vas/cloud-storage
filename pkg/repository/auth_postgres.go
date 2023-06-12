@@ -4,11 +4,14 @@ import (
 	"fmt"
 	cloud_storage "github.com/danil-vas/cloud-storage"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 type AuthPostgres struct {
 	db *sqlx.DB
 }
+
+const UserMemory = 1073741824 // 1 Gb
 
 func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 	return &AuthPostgres{db: db}
@@ -16,8 +19,8 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 
 func (r *AuthPostgres) CreateUser(user cloud_storage.User) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO %s (login, name, username, password_hash) values ($1, $2, $3, $4) RETURNING id", usersTable)
-	row := r.db.QueryRow(query, user.Login, user.Name, user.Username, user.Password)
+	query := fmt.Sprintf("INSERT INTO %s (login, name, username, password_hash, available_memory) values ($1, $2, $3, $4, $5) RETURNING id", usersTable)
+	row := r.db.QueryRow(query, user.Login, user.Name, user.Username, user.Password, UserMemory)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -25,8 +28,8 @@ func (r *AuthPostgres) CreateUser(user cloud_storage.User) (int, error) {
 }
 
 func (r *AuthPostgres) CreateMainDirectory(id int, login string) error {
-	query := fmt.Sprintf("INSERT INTO %s (name, type_object_id, user_id) values ($1, $2, $3)", objectsTable)
-	_, err := r.db.Exec(query, login, 3, id)
+	query := fmt.Sprintf("INSERT INTO %s (name, server_name, type_object_id, user_id, create_date) values ($1, $2, $3, $4, $5)", objectsTable)
+	_, err := r.db.Exec(query, login, login, 3, id, time.Now())
 	if err != nil {
 		return err
 	}
