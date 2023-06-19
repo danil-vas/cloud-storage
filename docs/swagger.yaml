@@ -30,6 +30,30 @@ definitions:
       username:
         type: string
     type: object
+  cloud_storage.UserInfo:
+    properties:
+      available_memory:
+        type: integer
+      id:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.jsonResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      size:
+        type: integer
+      status:
+        type: string
+    type: object
   handler.signInInput:
     properties:
       login:
@@ -79,6 +103,39 @@ paths:
       tags:
       - Directory
   /api/directory/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete directory
+      operationId: delete-directory
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: error
+          schema:
+            type: string
+        "404":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+        default:
+          description: error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Directory
+      tags:
+      - Directory
     get:
       consumes:
       - application/json
@@ -112,6 +169,207 @@ paths:
       summary: Get Directory
       tags:
       - Directory
+    post:
+      consumes:
+      - application/json
+      description: create directory
+      operationId: create-directory
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: error
+          schema:
+            type: string
+        "404":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+        default:
+          description: error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create Directory
+      tags:
+      - Directory
+  /api/file/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete file
+      operationId: delete-file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: error
+          schema:
+            type: string
+        "404":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+        default:
+          description: error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete File
+      tags:
+      - File
+    get:
+      consumes:
+      - application/json
+      description: download file
+      operationId: download-file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: error
+          schema:
+            type: string
+        "404":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+        default:
+          description: error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Download File
+      tags:
+      - File
+    post:
+      consumes:
+      - multipart/form-data
+      description: upload file
+      operationId: upload-file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.jsonResponse'
+        "400":
+          description: error
+          schema:
+            type: string
+        "404":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+        default:
+          description: error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Upload File
+      tags:
+      - File
+  /api/user/:
+    get:
+      consumes:
+      - application/json
+      description: get user
+      operationId: get-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/cloud_storage.UserInfo'
+        "400":
+          description: error
+          schema:
+            type: string
+        "404":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+        default:
+          description: error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get User
+      tags:
+      - User
+  /api/user/id:
+    post:
+      consumes:
+      - application/json
+      description: share object
+      operationId: share-object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: error
+          schema:
+            type: string
+        "404":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+        default:
+          description: error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Share Object
+      tags:
+      - User
   /auth/sign-in:
     post:
       consumes:

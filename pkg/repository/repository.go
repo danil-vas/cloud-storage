@@ -20,10 +20,11 @@ type File interface {
 	GetAvailableMemory(userId int) (int, error)
 	CheckAccessToObject(userId int, objectId int) (bool, error)
 	GetTypeObject(objectId int) (string, error)
+	OriginalFileNameThroughServerName(serverName string) (string, error)
 }
 
 type Directory interface {
-	AddDirectory(userId int, objectId int, nameDirectory string) error
+	AddDirectory(userId int, objectId int, nameDirectory string) (int, error)
 	GetDirectoriesAndFiles(userId int, objectId int) ([]cloud_storage.Node, error)
 	DeleteDirectory(objectId int) error
 	GetIdMainDirectory(userID int) (int, error)

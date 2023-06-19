@@ -42,6 +42,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		user := api.Group("/user")
 		{
 			user.GET("/", h.getUser)
+			user.POST("/share/:id", h.shareObject)
 		}
 	}
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

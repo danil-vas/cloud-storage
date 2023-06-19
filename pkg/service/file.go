@@ -41,3 +41,6 @@ func (s *FileService) CheckAccessToObject(userId int, objectId int) (bool, error
 func (s *FileService) GetTypeObject(objectId int) (string, error) {
 	return s.repo.GetTypeObject(objectId)
 }
+func (s *FileService) OriginalFileNameThroughServerName(serverName string) (string, error) {
+	return s.repo.OriginalFileNameThroughServerName(serverName)
+}

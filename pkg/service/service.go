@@ -17,6 +17,7 @@ type File interface {
 	PathUploadFile(userId int, objectId int) (string, error)
 	AddUploadFileToUser(userId int, objectId int, originalName string, serverName string, size int64, create_time time.Time) (int, error)
 	OriginalFileName(objectId int) (string, error)
+	OriginalFileNameThroughServerName(serverName string) (string, error)
 	DeleteFile(userId int, objectId int) error
 	GetAvailableMemory(userId int) (int, error)
 	CheckAccessToObject(userId int, objectId int) (bool, error)
@@ -24,7 +25,7 @@ type File interface {
 }
 
 type Directory interface {
-	AddDirectory(userId int, objectId int, nameDirectory string) error
+	AddDirectory(userId int, objectId int, nameDirectory string) (int, error)
 	GetDirectoriesAndFiles(userId int, objectId int) ([]cloud_storage.Node, error)
 	DeleteDirectory(objectId int) error
 	GetIdMainDirectory(userID int) (int, error)

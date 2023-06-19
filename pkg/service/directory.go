@@ -13,7 +13,7 @@ func NewDirectoryService(repo repository.Directory) *DirectoryService {
 	return &DirectoryService{repo: repo}
 }
 
-func (s *DirectoryService) AddDirectory(userId int, objectId int, nameDirectory string) error {
+func (s *DirectoryService) AddDirectory(userId int, objectId int, nameDirectory string) (int, error) {
 	return s.repo.AddDirectory(userId, objectId, nameDirectory)
 }
 

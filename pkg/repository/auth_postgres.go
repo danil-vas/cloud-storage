@@ -28,8 +28,8 @@ func (r *AuthPostgres) CreateUser(user cloud_storage.User) (int, error) {
 }
 
 func (r *AuthPostgres) CreateMainDirectory(id int, login string) error {
-	query := fmt.Sprintf("INSERT INTO %s (name, server_name, type_object_id, user_id, create_date) values ($1, $2, $3, $4, $5)", objectsTable)
-	_, err := r.db.Exec(query, login, login, 3, id, time.Now())
+	query := fmt.Sprintf("INSERT INTO %s (name, server_name, type_object_id, user_id, create_date, size) values ($1, $2, $3, $4, $5, $6)", objectsTable)
+	_, err := r.db.Exec(query, login, login, 3, id, time.Now(), 0)
 	if err != nil {
 		return err
 	}

@@ -32,7 +32,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
-
 	repos := repository.NewRepository(db)
 	services := service.NewServices(repos)
 	handlers := handler.NewHandler(services)

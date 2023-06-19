@@ -94,7 +94,7 @@ func (r *FilePostgres) CheckAccessToObject(userId int, objectId int) (bool, erro
 	var objectUserID int
 	err := r.db.QueryRow("SELECT user_id FROM objects WHERE id=$1", objectId).Scan(&objectUserID)
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 	if objectUserID == userId {
 		return true, nil
@@ -114,4 +114,14 @@ func (r *FilePostgres) GetTypeObject(objectId int) (string, error) {
 	} else {
 		return "directory", nil
 	}
+}
+
+func (r *FilePostgres) OriginalFileNameThroughServerName(serverName string) (string, error) {
+	var name string
+	query := fmt.Sprintf("SELECT name FROM %s WHERE server_name = $1", objectsTable)
+	row := r.db.QueryRow(query, serverName)
+	if err := row.Scan(&name); err != nil {
+		return "", err
+	}
+	return name, nil
 }

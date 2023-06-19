@@ -1,6 +1,6 @@
 CREATE TABLE users (
                        id SERIAL PRIMARY KEY,
-                       login VARCHAR(50) NOT NULL,
+                       login VARCHAR(50) NOT NULL UNIQUE,
                        name VARCHAR(50) NOT NULL,
                        username VARCHAR(50) NOT NULL,
                        password_hash VARCHAR(255) NOT NULL,
@@ -14,9 +14,9 @@ CREATE TABLE typeObject (
 
 CREATE TABLE objects (
                        id SERIAL PRIMARY KEY,
-                       name VARCHAR(50) NOT NULL,
+                       name VARCHAR(260) NOT NULL,
                        server_name VARCHAR(50) NULL,
-                       size INT NULL,
+                       size INT NOT NULL,
                        create_date TIMESTAMP NULL,
                        user_id INT NOT NULL,
                        parent_id INTEGER REFERENCES objects ON DELETE CASCADE,

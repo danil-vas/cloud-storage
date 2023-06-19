@@ -7,22 +7,40 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
+// @Summary Create Directory
+// @Security ApiKeyAuth
+// @Tags Directory
+// @Description create directory
+// @ID create-directory
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string
+// @Failure 400,404 {string}  string    "error"
+// @Failure 500 {string}  string    "error"
+// @Failure default {string}  string    "error"
+// @Router /api/directory/{id} [post]
 func (h *Handler) createDirectory(c *gin.Context) {
 	userId, err := getUsersId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error()})
 		return
 	}
 	objectId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	flag, err := h.services.CheckAccessToObject(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	if flag == false {
@@ -31,23 +49,39 @@ func (h *Handler) createDirectory(c *gin.Context) {
 	}
 	path, err := h.services.File.PathUploadFile(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	path = "temp/" + path
 	nameDirectory, _ := c.GetPostForm("name")
-	err = os.MkdirAll(path+"/"+nameDirectory, 0777)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	_, err = os.Stat(path + "/" + nameDirectory)
+	if err == nil {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "a directory with the given name exists",
+		})
 		return
 	}
-	err = h.services.Directory.AddDirectory(userId, objectId, nameDirectory)
+	err = os.MkdirAll(path+"/"+nameDirectory, 0777)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+	id, err := h.services.Directory.AddDirectory(userId, objectId, nameDirectory)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "complete",
+		"id":          id,
+		"name":        nameDirectory,
+		"create_date": time.Now(),
+		"parent_id":   objectId,
 	})
 }
 
@@ -66,17 +100,23 @@ func (h *Handler) createDirectory(c *gin.Context) {
 func (h *Handler) getDirectory(c *gin.Context) {
 	userId, err := getUsersId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	objectId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	flag, err := h.services.CheckAccessToObject(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	if flag == false {
@@ -85,7 +125,9 @@ func (h *Handler) getDirectory(c *gin.Context) {
 	}
 	resp, err := h.services.Directory.GetDirectoriesAndFiles(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, resp)
@@ -106,17 +148,23 @@ func (h *Handler) getDirectory(c *gin.Context) {
 func (h *Handler) getMainDirectory(c *gin.Context) {
 	userId, err := getUsersId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	objectId, err := h.services.Directory.GetIdMainDirectory(userId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	flag, err := h.services.CheckAccessToObject(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	if flag == false {
@@ -125,7 +173,9 @@ func (h *Handler) getMainDirectory(c *gin.Context) {
 	}
 	resp, err := h.services.Directory.GetDirectoriesAndFiles(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, resp)
@@ -165,7 +215,6 @@ func traverseNodes(node *cloud_storage.Node, user_id int, h *Handler) {
 		traverseNodes(child, user_id, h)
 	}
 
-	// Добавьте здесь нужную обработку родительской директории
 	if node.Type == "file" {
 		path, err := h.services.File.PathUploadFile(user_id, node.ID)
 		if err != nil {
@@ -191,20 +240,38 @@ func traverseNodes(node *cloud_storage.Node, user_id int, h *Handler) {
 	}
 }
 
+// @Summary Delete Directory
+// @Security ApiKeyAuth
+// @Tags Directory
+// @Description delete directory
+// @ID delete-directory
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string
+// @Failure 400,404 {string}  string    "error"
+// @Failure 500 {string}  string    "error"
+// @Failure default {string}  string    "error"
+// @Router /api/directory/{id} [delete]
 func (h *Handler) deleteDirectory(c *gin.Context) {
 	userId, err := getUsersId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	objectId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	flag, err := h.services.CheckAccessToObject(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	if flag == false {
@@ -213,7 +280,9 @@ func (h *Handler) deleteDirectory(c *gin.Context) {
 	}
 	resp, err := h.services.Directory.GetDirectoriesAndFiles(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	for _, item := range resp {
@@ -221,15 +290,13 @@ func (h *Handler) deleteDirectory(c *gin.Context) {
 	}
 	path, err := h.services.File.PathUploadFile(userId, objectId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	path = "temp/" + path
-	err = os.Remove(path)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
+	_ = os.Remove(path)
 	err = h.services.File.DeleteFile(userId, objectId)
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "complete",

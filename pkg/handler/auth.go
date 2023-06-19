@@ -22,13 +22,28 @@ func (h *Handler) singUp(c *gin.Context) {
 	var input cloud_storage.User
 
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
-
+	if len(input.Login) < 4 {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "minimum login length 4",
+		})
+		return
+	}
+	if len(input.Password) < 4 {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "minimum password length 4",
+		})
+		return
+	}
 	id, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	err = h.services.Authorization.CreateMainDirectory(id, input.Login)
@@ -58,12 +73,16 @@ func (h *Handler) singIn(c *gin.Context) {
 	var input signInInput
 
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	token, err := h.services.Authorization.GenerateToken(input.Login, input.Password)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "login or password entered incorrectly",
+		})
 		return
 	}
 

@@ -5,6 +5,18 @@ import (
 	"net/http"
 )
 
+// @Summary Get User
+// @Security ApiKeyAuth
+// @Tags User
+// @Description get user
+// @ID get-user
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} cloud_storage.UserInfo
+// @Failure 400,404 {string}  string    "error"
+// @Failure 500 {string}  string    "error"
+// @Failure default {string}  string    "error"
+// @Router /api/user/ [get]
 func (h *Handler) getUser(ctx *gin.Context) {
 	userId, err := getUsersId(ctx)
 	if err != nil {
@@ -13,7 +25,9 @@ func (h *Handler) getUser(ctx *gin.Context) {
 	}
 	info, err := h.services.User.GetUser(userId)
 	if err != nil {
-		newErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 	ctx.JSON(http.StatusOK, info)
